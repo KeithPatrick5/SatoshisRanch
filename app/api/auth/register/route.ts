@@ -1,0 +1,4 @@
+export const dynamic = 'force-dynamic';
+import { redirect } from 'next/navigation';
+import { appendAudit, createSession, readState, upsertUser, writeState } from '@/lib/local-store';
+export async function POST(req:Request){const form=await req.formData();const username=String(form.get('username')||'localuser');const state=readState();if(!state.users.find(u=>u.username===username)){upsertUser(state,{id:`u-${Date.now()}`,username,role:'buyer',country:String(form.get('country')||'MX'),region:String(form.get('region')||'Local'),status:'active',sellerStatus:'none',trades:0,positive:0,negative:0,disputeRate:0,avgReleaseMinutes:0,badges:['Buyer'],riskLevel:'low',lastSeen:'online'});appendAudit(state,username,'auth.register',username,'Created local account. Password is not persisted in this fake local build.');}const session=createSession(state,state.users.find(u=>u.username===username)!.id);writeState(state);redirect(`/dashboard?session=${session.id}`)}

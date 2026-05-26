@@ -1,0 +1,3 @@
+export const dynamic = 'force-dynamic';
+import { Shell, PageTitle } from '@/components/Shell';
+export default function Register(){return <Shell><PageTitle title="Register" subtitle="Local account creation for testing profile/session flows."/><form className="box stack" method="post" action="/api/auth/register"><label>Email<input name="email" defaultValue="local@example.test"/></label><label>Username<input name="username" defaultValue="newrancher"/></label><label>Country<input name="country" defaultValue="MX"/></label><label>Region<input name="region" defaultValue="Jalisco"/></label><label>Password<input name="password" type="password" defaultValue="local-only"/></label><button>Create local account</button></form></Shell>}

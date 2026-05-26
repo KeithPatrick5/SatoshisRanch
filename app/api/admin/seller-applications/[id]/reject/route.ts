@@ -1,0 +1,3 @@
+export const dynamic = 'force-dynamic';
+import { redirect } from 'next/navigation';import { appendAudit, appendNotification, readState, writeState } from '@/lib/local-store';
+export async function POST(_:Request,context:{params:Promise<{id:string}>}){const {id}=await context.params;const state=readState();const app=state.sellerApplications.find(a=>a.id===id);if(app){app.status='rejected';app.reviewedAt=new Date().toISOString();app.reviewedBy='ranch_office';appendAudit(state,'ranch_office','seller.application.reject',id,`${app.username} rejected.`);appendNotification(state,'email','seller.rejected',app.username,'Seller application rejected in local mode.');}writeState(state);redirect('/admin/users')}

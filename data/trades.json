@@ -1,0 +1,34 @@
+[
+  {
+    "id": "SR-10001",
+    "offerId": "of-1001",
+    "buyer": "northbank",
+    "seller": "btc_rancher",
+    "status": "WAITING_BUYER_PAYMENT",
+    "currency": "MXN",
+    "fiatAmount": 2000,
+    "btcAmountSats": 158730,
+    "feeSats": 1587,
+    "buyerReceivesSats": 157143,
+    "paymentMethod": "SPEI bank transfer",
+    "createdAt": "2026-05-26T19:05:00Z",
+    "deadline": "30 minutes",
+    "risk": "low"
+  },
+  {
+    "id": "SR-10002",
+    "offerId": "of-1002",
+    "buyer": "newtrail",
+    "seller": "fastsats",
+    "status": "DISPUTED",
+    "currency": "MXN",
+    "fiatAmount": 1400,
+    "btcAmountSats": 109890,
+    "feeSats": 1099,
+    "buyerReceivesSats": 108791,
+    "paymentMethod": "Cash deposit",
+    "createdAt": "2026-05-26T18:18:00Z",
+    "deadline": "frozen",
+    "risk": "high"
+  }
+]

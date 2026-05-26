@@ -1,0 +1,100 @@
+[
+  {
+    "id": "u-buyer-1",
+    "username": "northbank",
+    "role": "buyer",
+    "country": "MX",
+    "region": "Jalisco",
+    "status": "active",
+    "sellerStatus": "none",
+    "trades": 12,
+    "positive": 11,
+    "negative": 0,
+    "disputeRate": 0.02,
+    "avgReleaseMinutes": 0,
+    "badges": [
+      "Buyer"
+    ],
+    "riskLevel": "low",
+    "lastSeen": "2 min ago"
+  },
+  {
+    "id": "u-seller-1",
+    "username": "btc_rancher",
+    "role": "seller",
+    "country": "MX",
+    "region": "Jalisco",
+    "status": "active",
+    "sellerStatus": "approved",
+    "trades": 312,
+    "positive": 309,
+    "negative": 2,
+    "disputeRate": 0.005,
+    "avgReleaseMinutes": 7,
+    "badges": [
+      "Verified Rancher",
+      "Fast Release",
+      "Bonded Rancher"
+    ],
+    "riskLevel": "low",
+    "lastSeen": "online"
+  },
+  {
+    "id": "u-seller-2",
+    "username": "fastsats",
+    "role": "seller",
+    "country": "MX",
+    "region": "CDMX",
+    "status": "active",
+    "sellerStatus": "approved",
+    "trades": 91,
+    "positive": 88,
+    "negative": 1,
+    "disputeRate": 0.014,
+    "avgReleaseMinutes": 11,
+    "badges": [
+      "Verified Rancher"
+    ],
+    "riskLevel": "medium",
+    "lastSeen": "9 min ago"
+  },
+  {
+    "id": "u-seller-3",
+    "username": "oldforumdesk",
+    "role": "seller",
+    "country": "US",
+    "region": "Online",
+    "status": "active",
+    "sellerStatus": "approved",
+    "trades": 522,
+    "positive": 517,
+    "negative": 3,
+    "disputeRate": 0.007,
+    "avgReleaseMinutes": 5,
+    "badges": [
+      "High Volume",
+      "Fast Release"
+    ],
+    "riskLevel": "low",
+    "lastSeen": "online"
+  },
+  {
+    "id": "u-admin-1",
+    "username": "ranch_office",
+    "role": "admin",
+    "country": "MX",
+    "region": "Ops",
+    "status": "active",
+    "sellerStatus": "none",
+    "trades": 0,
+    "positive": 0,
+    "negative": 0,
+    "disputeRate": 0,
+    "avgReleaseMinutes": 0,
+    "badges": [
+      "Admin"
+    ],
+    "riskLevel": "low",
+    "lastSeen": "online"
+  }
+]

@@ -1,0 +1,373 @@
+[
+  {
+    "phase": 1,
+    "slug": "product-positioning",
+    "title": "Product definition, public positioning, and local-only constraints",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved"
+    ]
+  },
+  {
+    "phase": 2,
+    "slug": "localbitcoins-patterns",
+    "title": "Old-school P2P marketplace layout and offer-table behavior",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved"
+    ]
+  },
+  {
+    "phase": 3,
+    "slug": "marketplace-foundation",
+    "title": "Offer browsing, filters, regions, currencies, and payment methods",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved"
+    ]
+  },
+  {
+    "phase": 4,
+    "slug": "user-accounts",
+    "title": "Local auth model, profiles, 2FA placeholders, account status",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved"
+    ]
+  },
+  {
+    "phase": 5,
+    "slug": "seller-applications",
+    "title": "Invite-only seller applications and admin approval workflow",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved"
+    ]
+  },
+  {
+    "phase": 6,
+    "slug": "offer-management",
+    "title": "Seller offer creation, pricing margin, limits, terms, pause/resume",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved"
+    ]
+  },
+  {
+    "phase": 7,
+    "slug": "trade-state-machine",
+    "title": "Strict trade states and transition guardrails",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved"
+    ]
+  },
+  {
+    "phase": 8,
+    "slug": "trade-room",
+    "title": "Trade room with timers, status panels, chat, timeline, and actions",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved"
+    ]
+  },
+  {
+    "phase": 9,
+    "slug": "fake-escrow",
+    "title": "Fake BTC balance locking and release/refund simulation",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved"
+    ]
+  },
+  {
+    "phase": 10,
+    "slug": "double-entry-ledger",
+    "title": "Double-entry ledger model and balanced fixture transactions",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances"
+    ]
+  },
+  {
+    "phase": 11,
+    "slug": "wallet-shell",
+    "title": "Local wallet shell with deposits, withdrawals, locked balances, no mainnet",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 12,
+    "slug": "dispute-center",
+    "title": "Dispute opening, proof uploads, evidence timeline, and admin resolution",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 13,
+    "slug": "admin-command-center",
+    "title": "Ranch Office admin dashboard for trades, users, wallet, and disputes",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 14,
+    "slug": "reputation-layer",
+    "title": "Reputation, release speed, disputes, feedback, badges, seller stats",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 15,
+    "slug": "risk-engine",
+    "title": "Risk flags, clustering placeholders, velocity rules, fake receipt warnings",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 16,
+    "slug": "fee-engine",
+    "title": "Seller-paid trade fee calculation and visible buyer receive amount",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 17,
+    "slug": "notifications",
+    "title": "Email and Telegram notification event registry and mock outbox",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 18,
+    "slug": "payment-method-policy",
+    "title": "Allowed payment method policy and high-risk method restrictions",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 19,
+    "slug": "security-controls",
+    "title": "2FA requirements, rate limits, admin controls, sessions, audit logs",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 20,
+    "slug": "api-surface",
+    "title": "Typed local API routes for offers, trades, wallet, admin, and phases",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 21,
+    "slug": "database-schema",
+    "title": "Prisma schema for users, offers, trades, wallet, ledger, disputes",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 22,
+    "slug": "worker-design",
+    "title": "Local cron/worker design for timers, trade expiry, ledger reconciliation",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 23,
+    "slug": "bitcoin-infra-plan",
+    "title": "Bitcoin infra abstraction, testnet-only interfaces, mainnet disabled",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 24,
+    "slug": "limits-engine",
+    "title": "Tiny limits, trusted tiers, withdrawal holds, seller exposure caps",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 25,
+    "slug": "seller-tools",
+    "title": "Seller dashboard, exposure, low-balance warnings, bulk offer management",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 26,
+    "slug": "audit-logging",
+    "title": "Immutable trade/admin/wallet/security audit timeline",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 27,
+    "slug": "ops-dashboard",
+    "title": "Operational health pages: jobs, stuck trades, wallet mismatch, queues",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 28,
+    "slug": "testnet-readiness",
+    "title": "Testnet readiness checklist and disabled fake testnet watcher shell",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 29,
+    "slug": "mainnet-gates",
+    "title": "Mainnet gates, emergency freeze, hot-wallet cap policy, manual approval",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  },
+  {
+    "phase": 30,
+    "slug": "final-self-audit",
+    "title": "Final self-audit matrix across all phases and safety constraints",
+    "status": "implemented-local-safe",
+    "auditChecks": [
+      "phase doc exists",
+      "route or module surface exists",
+      "previous safety gates preserved",
+      "ledger still balances",
+      "mainnet remains disabled"
+    ]
+  }
+]

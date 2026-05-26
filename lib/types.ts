@@ -1,0 +1,16 @@
+export type Phase = { number: number; slug: string; title: string };
+export type User = { id:string; username:string; role:string; country:string; region:string; status:string; sellerStatus:string; trades:number; positive:number; negative:number; disputeRate:number; avgReleaseMinutes:number; badges:string[]; riskLevel:string; lastSeen:string };
+export type Offer = { id:string; sellerId:string; seller:string; country:string; currency:string; paymentMethod:string; price:number; marginBps:number; minFiat:number; maxFiat:number; availableSats:number; rating:string; release:string; terms:string; status:string };
+export type Trade = { id:string; offerId:string; buyer:string; seller:string; status:string; currency:string; fiatAmount:number; btcAmountSats:number; feeSats:number; buyerReceivesSats:number; paymentMethod:string; createdAt:string; deadline:string; risk:string };
+export type LedgerEntry = { group:string; account:string; direction:'debit'|'credit'; sats:number; reason:string; tradeId?:string; withdrawalId?:string; depositId?:string };
+export type RiskFlag = { id:string; severity:string; type:string; tradeId:string; user:string; details:string };
+export type SellerApplication = { id:string; userId:string; username:string; status:'pending'|'approved'|'rejected'; markets:string; paymentMethods:string; expectedVolume:string; notes:string; createdAt:string; reviewedAt?:string; reviewedBy?:string };
+export type TradeMessage = { id:string; tradeId:string; sender:string; body:string; system:boolean; createdAt:string };
+export type Evidence = { id:string; tradeId:string; uploader:string; kind:string; description:string; createdAt:string };
+export type Feedback = { id:string; tradeId:string; from:string; to:string; rating:1|0|-1; comment:string; createdAt:string };
+export type AuditLog = { id:string; actor:string; action:string; target:string; details:string; createdAt:string };
+export type NotificationEvent = { id:string; channel:'email'|'telegram'|'admin'; event:string; recipient:string; status:'queued'|'sent'|'mocked'|'failed'; payload:string; createdAt:string };
+export type LocalSession = { id:string; userId:string; ip:string; userAgent:string; createdAt:string; lastSeenAt:string; revokedAt:string|null };
+export type WithdrawalRequest = { id:string; userId:string; address:string; amountSats:number; feeSats:number; status:'pending_admin_review'|'approved'|'rejected'|'broadcast_disabled'; createdAt:string; reviewedAt?:string; reviewedBy?:string };
+export type WorkerRun = { id:string; worker:string; status:'ok'|'warning'|'disabled'|'failed'; details:string; createdAt:string };
+export type LocalState = { users:User[]; offers:Offer[]; trades:Trade[]; ledger:LedgerEntry[]; riskFlags:RiskFlag[]; sellerApplications:SellerApplication[]; tradeMessages:TradeMessage[]; evidence:Evidence[]; feedback:Feedback[]; auditLogs:AuditLog[]; notifications:NotificationEvent[]; sessions:LocalSession[]; withdrawals:WithdrawalRequest[]; workerRuns:WorkerRun[] };

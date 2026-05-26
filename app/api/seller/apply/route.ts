@@ -1,0 +1,3 @@
+export const dynamic = 'force-dynamic';
+import { redirect } from 'next/navigation';import { createSellerApplication, readState, writeState } from '@/lib/local-store';
+export async function POST(req:Request){const f=await req.formData();const state=readState();createSellerApplication(state,{userId:String(f.get('userId')||'u-buyer-1'),username:String(f.get('username')||'northbank'),markets:String(f.get('markets')||''),paymentMethods:String(f.get('paymentMethods')||''),expectedVolume:String(f.get('expectedVolume')||''),notes:String(f.get('notes')||'')});writeState(state);redirect('/admin/users')}

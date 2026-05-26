@@ -1,0 +1,2 @@
+export const dynamic = 'force-dynamic';
+import { Shell, PageTitle } from '@/components/Shell';import { LedgerAuditTable, WithdrawalsTable } from '@/components/AdminTables';export default function AdminWallet(){return <Shell><PageTitle title="Admin wallet monitor" subtitle="Internal liabilities vs fake wallet shell."/><div className="notice danger">Mainnet wallet operations are intentionally absent. Approve only changes local withdrawal status.</div><div className="box"><h2>Withdrawal queue</h2><WithdrawalsTable/></div><LedgerAuditTable/></Shell>}

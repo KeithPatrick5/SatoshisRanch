@@ -1,0 +1,26 @@
+[
+  {
+    "id": "rf-1",
+    "severity": "high",
+    "type": "receipt_quality",
+    "tradeId": "SR-10002",
+    "user": "newtrail",
+    "details": "Cash-deposit proof is cropped and timestamp is missing."
+  },
+  {
+    "id": "rf-2",
+    "severity": "medium",
+    "type": "new_account_limit",
+    "tradeId": "SR-10002",
+    "user": "newtrail",
+    "details": "New buyer opened max-size cash deposit trade."
+  },
+  {
+    "id": "rf-3",
+    "severity": "low",
+    "type": "seller_release_slowdown",
+    "tradeId": "SR-10001",
+    "user": "btc_rancher",
+    "details": "Release time still inside seller average."
+  }
+]

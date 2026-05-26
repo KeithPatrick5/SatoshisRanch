@@ -1,0 +1,58 @@
+[
+  {
+    "group": "lg-1001",
+    "account": "seller:u-seller-1:available",
+    "direction": "debit",
+    "sats": 158730,
+    "reason": "lock escrow",
+    "tradeId": "SR-10001"
+  },
+  {
+    "group": "lg-1001",
+    "account": "escrow:SR-10001",
+    "direction": "credit",
+    "sats": 158730,
+    "reason": "lock escrow",
+    "tradeId": "SR-10001"
+  },
+  {
+    "group": "lg-1002",
+    "account": "escrow:SR-10001",
+    "direction": "debit",
+    "sats": 158730,
+    "reason": "release simulated",
+    "tradeId": "SR-10001"
+  },
+  {
+    "group": "lg-1002",
+    "account": "buyer:u-buyer-1:available",
+    "direction": "credit",
+    "sats": 157143,
+    "reason": "buyer receives",
+    "tradeId": "SR-10001"
+  },
+  {
+    "group": "lg-1002",
+    "account": "platform:fee_revenue",
+    "direction": "credit",
+    "sats": 1587,
+    "reason": "platform fee",
+    "tradeId": "SR-10001"
+  },
+  {
+    "group": "lg-1003",
+    "account": "seller:u-seller-2:available",
+    "direction": "debit",
+    "sats": 109890,
+    "reason": "lock disputed escrow",
+    "tradeId": "SR-10002"
+  },
+  {
+    "group": "lg-1003",
+    "account": "escrow:SR-10002",
+    "direction": "credit",
+    "sats": 109890,
+    "reason": "lock disputed escrow",
+    "tradeId": "SR-10002"
+  }
+]

@@ -1,0 +1,28 @@
+{
+  "name": "satoshis-ranch",
+  "version": "0.30.0-local",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "lint": "next lint",
+    "audit:phase": "node scripts/audit-phase.mjs",
+    "audit:all": "node scripts/audit-all.mjs",
+    "audit:ledger": "node scripts/audit-ledger.mjs",
+    "audit:safety": "node scripts/audit-safety.mjs",
+    "audit:local": "npm run audit:phase && npm run audit:ledger && npm run audit:safety && npm run audit:all && npm run audit:functional",
+    "audit:functional": "node scripts/audit-functional.mjs"
+  },
+  "dependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "typescript": "latest"
+  },
+  "overrides": {
+    "postcss": "^8.5.10"
+  }
+}

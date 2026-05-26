@@ -1,0 +1,5 @@
+export const dynamic = 'force-dynamic';
+import { redirect } from 'next/navigation';
+import { getOffers } from '@/lib/data';import { appendAudit, readState, writeState } from '@/lib/local-store';
+export async function GET(){return Response.json({offers:getOffers()});}
+export async function POST(req:Request){const f=await req.formData();const state=readState();const seller=String(f.get('seller')||'btc_rancher');const offer={id:`of-${Date.now()}`,sellerId:String(f.get('sellerId')||'u-seller-1'),seller,country:String(f.get('country')||'Mexico'),currency:String(f.get('currency')||'MXN'),paymentMethod:String(f.get('paymentMethod')||'SPEI bank transfer'),price:Number(f.get('price')||1260000),marginBps:Number(f.get('marginBps')||500),minFiat:Number(f.get('minFiat')||500),maxFiat:Number(f.get('maxFiat')||5000),availableSats:Number(f.get('availableSats')||250000),rating:'local / 0',release:'manual',terms:String(f.get('terms')||'Local fake offer.'),status:'open'};state.offers.unshift(offer);appendAudit(state,seller,'offer.create',offer.id,'Created local persistent offer.');writeState(state);redirect('/offers/manage')}

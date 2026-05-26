@@ -1,0 +1,3 @@
+export const dynamic = 'force-dynamic';
+import { redirect } from 'next/navigation';import { createFeedback, readState, writeState } from '@/lib/local-store';
+export async function POST(req:Request, context:{params:Promise<{id:string}>}){const {id}=await context.params;const f=await req.formData();const state=readState();const raw=Number(f.get('rating')||0);const rating=(raw>0?1:raw<0?-1:0) as 1|0|-1;createFeedback(state,{tradeId:id,from:String(f.get('from')||'local-user'),to:String(f.get('to')||'btc_rancher'),rating,comment:String(f.get('comment')||'Local feedback')});writeState(state);redirect(`/trades/${id}`)}

@@ -1,0 +1,2 @@
+export const dynamic = 'force-dynamic';
+import { Shell, PageTitle } from '@/components/Shell';import { AdminUsers, SellerApplicationsTable } from '@/components/AdminTables';export default function Users(){return <Shell><PageTitle title="Admin users" subtitle="Search, freeze, ban, annotate, and review sellers."/><div className="box"><h2>Seller applications</h2><SellerApplicationsTable/></div><div className="box"><h2>Users</h2><AdminUsers/></div></Shell>}

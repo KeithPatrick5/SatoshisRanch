@@ -1,0 +1,53 @@
+[
+  {
+    "id": "of-1001",
+    "sellerId": "u-seller-1",
+    "seller": "btc_rancher",
+    "country": "Mexico",
+    "currency": "MXN",
+    "paymentMethod": "SPEI bank transfer",
+    "price": 1260000,
+    "marginBps": 500,
+    "minFiat": 500,
+    "maxFiat": 5000,
+    "availableSats": 1800000,
+    "rating": "99% / 312",
+    "release": "7 min",
+    "terms": "SPEI only. Name must match account. Upload receipt only after payment is sent.",
+    "status": "open"
+  },
+  {
+    "id": "of-1002",
+    "sellerId": "u-seller-2",
+    "seller": "fastsats",
+    "country": "Mexico",
+    "currency": "MXN",
+    "paymentMethod": "Cash deposit",
+    "price": 1274000,
+    "marginBps": 620,
+    "minFiat": 1000,
+    "maxFiat": 10000,
+    "availableSats": 2400000,
+    "rating": "98% / 91",
+    "release": "11 min",
+    "terms": "Cash deposit at listed bank branches. No third-party deposits. Keep receipt.",
+    "status": "open"
+  },
+  {
+    "id": "of-1003",
+    "sellerId": "u-seller-3",
+    "seller": "oldforumdesk",
+    "country": "United States",
+    "currency": "USD",
+    "paymentMethod": "Zelle approved traders",
+    "price": 70400,
+    "marginBps": 420,
+    "minFiat": 50,
+    "maxFiat": 600,
+    "availableSats": 900000,
+    "rating": "99% / 522",
+    "release": "5 min",
+    "terms": "Approved users only. Sender name must match Ranch profile.",
+    "status": "open"
+  }
+]

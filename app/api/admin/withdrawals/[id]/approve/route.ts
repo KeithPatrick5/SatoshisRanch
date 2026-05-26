@@ -1,0 +1,3 @@
+export const dynamic = 'force-dynamic';
+import { redirect } from 'next/navigation';import { appendAudit, appendNotification, readState, writeState } from '@/lib/local-store';
+export async function POST(_:Request,context:{params:Promise<{id:string}>}){const {id}=await context.params;const state=readState();const w=state.withdrawals.find(x=>x.id===id);if(w){w.status='broadcast_disabled';w.reviewedAt=new Date().toISOString();w.reviewedBy='ranch_office';appendAudit(state,'ranch_office','withdrawal.approve_mock',id,'Approved review, but broadcast remains disabled.');appendNotification(state,'admin','withdrawal.broadcast_blocked','ranch_office',`${id} approved but broadcast disabled.`);}writeState(state);redirect('/admin/wallet')}

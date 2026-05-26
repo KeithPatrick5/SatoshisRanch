@@ -1,0 +1,13 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+model User { id String @id email String? @unique username String @unique role String status String sellerStatus String createdAt DateTime @default(now()) }
+model Offer { id String @id sellerId String side String status String country String currency String paymentMethod String minFiat Int maxFiat Int marginBps Int terms String createdAt DateTime @default(now()) }
+model Trade { id String @id offerId String buyerId String sellerId String status String currency String fiatAmount Int btcAmountSats Int feeSats Int createdAt DateTime @default(now()) }
+model TradeMessage { id String @id tradeId String senderId String body String systemMessage Boolean @default(false) createdAt DateTime @default(now()) }
+model Dispute { id String @id tradeId String openedBy String status String reason String? resolution String? createdAt DateTime @default(now()) }
+model LedgerEntry { id String @id groupId String account String direction String sats Int reason String tradeId String? createdAt DateTime @default(now()) }
+model BtcDeposit { id String @id userId String address String txid String? amountSats Int status String createdAt DateTime @default(now()) }
+model BtcWithdrawal { id String @id userId String address String amountSats Int feeSats Int status String txid String? createdAt DateTime @default(now()) }
+model Feedback { id String @id tradeId String fromUserId String toUserId String rating Int comment String? createdAt DateTime @default(now()) }
+model RiskFlag { id String @id userId String? tradeId String? flagType String severity String detailsJson Json status String createdAt DateTime @default(now()) }
+model AuditLog { id String @id actorId String? action String entityType String entityId String metadata Json createdAt DateTime @default(now()) }
