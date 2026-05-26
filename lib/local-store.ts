@@ -13,7 +13,7 @@ const statePath = path.join(dataDir, 'local-state.json');
 function seedState(): LocalState {
   const now = new Date().toISOString();
   return {
-    users: initialUsers as User[],
+    users: (initialUsers as User[]).map((user) => ({ ...user, email: `${user.username}@satoshisranch.local`, passwordHash: user.passwordHash ?? 'local-dev-seeded-change-before-production', passwordSalt: user.passwordSalt ?? 'local-dev' })),
     offers: initialOffers as Offer[],
     trades: initialTrades as Trade[],
     ledger: initialLedger as LedgerEntry[],

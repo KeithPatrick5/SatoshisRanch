@@ -1,6 +1,6 @@
 {
   "name": "satoshis-ranch",
-  "version": "0.30.0-local",
+  "version": "0.70.0-database-first-local",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,8 +10,16 @@
     "audit:all": "node scripts/audit-all.mjs",
     "audit:ledger": "node scripts/audit-ledger.mjs",
     "audit:safety": "node scripts/audit-safety.mjs",
-    "audit:local": "npm run audit:phase && npm run audit:ledger && npm run audit:safety && npm run audit:all && npm run audit:functional",
-    "audit:functional": "node scripts/audit-functional.mjs"
+    "audit:local": "npm run audit:phase && npm run audit:ledger && npm run audit:safety && npm run audit:all && npm run audit:functional && npm run audit:env && npm run audit:routes && npm run audit:db && npm run audit:db-first",
+    "audit:functional": "node scripts/audit-functional.mjs",
+    "audit:env": "node scripts/audit-env.mjs",
+    "audit:routes": "node scripts/audit-routes.mjs",
+    "audit:db": "node scripts/audit-db.mjs",
+    "audit:turnkey": "npm run audit:local",
+    "db:push": "DATABASE_URL=${DATABASE_URL:-file:./dev.db} prisma db push",
+    "db:seed": "DATABASE_URL=${DATABASE_URL:-file:./dev.db} tsx prisma/seed.ts",
+    "db:reset": "rm -f prisma/dev.db prisma/dev.db-journal && DATABASE_URL=${DATABASE_URL:-file:./dev.db} prisma db push && DATABASE_URL=${DATABASE_URL:-file:./dev.db} tsx prisma/seed.ts",
+    "audit:db-first": "node scripts/audit-db-first.mjs"
   },
   "dependencies": {
     "@types/node": "latest",
@@ -20,7 +28,10 @@
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "@prisma/client": "latest",
+    "prisma": "latest",
+    "tsx": "latest"
   },
   "overrides": {
     "postcss": "^8.5.10"

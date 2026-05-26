@@ -1,0 +1,1 @@
+export function requireFields(body: Record<string, unknown>, fields: string[]){ const missing = fields.filter((f)=>body[f]===undefined || body[f]===''); if(missing.length) throw new Error(`Missing fields: ${missing.join(', ')}`); }

@@ -1,3 +1,4 @@
 export const dynamic = 'force-dynamic';
-import { redirect } from 'next/navigation';import { appendAudit, appendLedgerGroup, appendMessage, readState, writeState } from '@/lib/local-store';
-export async function POST(_:Request,context:{params:Promise<{id:string}>}){const {id}=await context.params;const state=readState();const trade=state.trades.find(t=>t.id===id);if(trade){trade.status='REFUNDED';trade.deadline='refunded';appendLedgerGroup(state,[{account:`escrow:${id}`,direction:'debit',sats:trade.btcAmountSats,reason:'admin refund seller',tradeId:id},{account:`seller:${trade.seller}:available`,direction:'credit',sats:trade.btcAmountSats,reason:'seller refund',tradeId:id}]);appendMessage(state,id,'system','Ranch Office refunded the seller from local fake escrow.',true);appendAudit(state,'ranch_office','dispute.refund',id,'Refunded seller in local fake ledger.');}writeState(state);redirect('/admin/disputes')}
+import { redirect } from 'next/navigation';
+import { refundTradeDb } from '@/lib/trades/db-engine';
+export async function POST(_:Request, context:{params:Promise<{id:string}>}){const {id}=await context.params;try{refundTradeDb(id,'ranch_office');}catch{}redirect('/admin/disputes')}

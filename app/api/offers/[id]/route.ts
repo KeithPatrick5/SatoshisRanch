@@ -1,0 +1,3 @@
+export const dynamic = 'force-dynamic';
+import { ok, fail } from '@/lib/api/response';import { appendAudit, readState, writeState } from '@/lib/local-store';
+export async function PATCH(req:Request, context:{params:Promise<{id:string}>}){ const {id}=await context.params; const body=await req.json().catch(()=>({})); const state=readState(); const offer=state.offers.find(o=>o.id===id); if(!offer)return fail('Offer not found',404); Object.assign(offer, { terms: body.terms ?? offer.terms, minFiat: Number(body.minFiat ?? offer.minFiat), maxFiat: Number(body.maxFiat ?? offer.maxFiat) }); appendAudit(state,'local-seller','offer.edit',id,'Offer edited through local API.'); writeState(state); return ok(offer); }

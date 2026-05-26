@@ -1,13 +1,278 @@
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql" url = env("DATABASE_URL") }
-model User { id String @id email String? @unique username String @unique role String status String sellerStatus String createdAt DateTime @default(now()) }
-model Offer { id String @id sellerId String side String status String country String currency String paymentMethod String minFiat Int maxFiat Int marginBps Int terms String createdAt DateTime @default(now()) }
-model Trade { id String @id offerId String buyerId String sellerId String status String currency String fiatAmount Int btcAmountSats Int feeSats Int createdAt DateTime @default(now()) }
-model TradeMessage { id String @id tradeId String senderId String body String systemMessage Boolean @default(false) createdAt DateTime @default(now()) }
-model Dispute { id String @id tradeId String openedBy String status String reason String? resolution String? createdAt DateTime @default(now()) }
-model LedgerEntry { id String @id groupId String account String direction String sats Int reason String tradeId String? createdAt DateTime @default(now()) }
-model BtcDeposit { id String @id userId String address String txid String? amountSats Int status String createdAt DateTime @default(now()) }
-model BtcWithdrawal { id String @id userId String address String amountSats Int feeSats Int status String txid String? createdAt DateTime @default(now()) }
-model Feedback { id String @id tradeId String fromUserId String toUserId String rating Int comment String? createdAt DateTime @default(now()) }
-model RiskFlag { id String @id userId String? tradeId String? flagType String severity String detailsJson Json status String createdAt DateTime @default(now()) }
-model AuditLog { id String @id actorId String? action String entityType String entityId String metadata Json createdAt DateTime @default(now()) }
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id
+  email             String?  @unique
+  username          String   @unique
+  passwordHash      String?
+  passwordSalt      String?
+  role              String
+  country           String
+  region            String
+  status            String
+  sellerStatus      String
+  trades            Int      @default(0)
+  positive          Int      @default(0)
+  negative          Int      @default(0)
+  disputeRate       Float    @default(0)
+  avgReleaseMinutes Int      @default(0)
+  badgesJson        String   @default("[]")
+  riskLevel         String   @default("low")
+  lastSeen          String   @default("offline")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  sessions          Session[]
+  sellerApplications SellerApplication[]
+  offers            Offer[]
+}
+
+model Session {
+  id          String   @id
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  ip          String
+  userAgent   String
+  createdAt   DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+  revokedAt   DateTime?
+}
+
+model SellerApplication {
+  id             String   @id
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  username       String
+  status         String
+  markets        String
+  paymentMethods String
+  expectedVolume String
+  notes          String
+  createdAt      DateTime @default(now())
+  reviewedAt     DateTime?
+  reviewedBy     String?
+}
+
+model Offer {
+  id            String   @id
+  sellerId      String
+  sellerUser    User     @relation(fields: [sellerId], references: [id])
+  seller        String
+  side          String   @default("sell_btc")
+  status        String
+  country       String
+  currency      String
+  paymentMethod String
+  price         Int
+  marginBps     Int
+  minFiat       Int
+  maxFiat       Int
+  availableSats Int
+  rating        String
+  release       String
+  terms         String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  trades        Trade[]
+}
+
+model Trade {
+  id               String   @id
+  offerId          String
+  offer            Offer    @relation(fields: [offerId], references: [id])
+  buyer            String
+  seller           String
+  status           String
+  currency         String
+  fiatAmount       Int
+  btcAmountSats    Int
+  feeSats          Int
+  buyerReceivesSats Int
+  paymentMethod    String
+  createdAt        DateTime @default(now())
+  deadline         String
+  risk             String
+
+  messages         TradeMessage[]
+  evidence         TradeAttachment[]
+  events           TradeEvent[]
+  disputes         Dispute[]
+  feedback         Feedback[]
+  ledgerEntries    LedgerEntry[]
+}
+
+model TradeMessage {
+  id            String   @id
+  tradeId       String
+  trade         Trade    @relation(fields: [tradeId], references: [id])
+  sender        String
+  body          String
+  systemMessage Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model TradeAttachment {
+  id          String   @id
+  tradeId     String
+  trade       Trade    @relation(fields: [tradeId], references: [id])
+  uploader    String
+  kind        String
+  description String
+  fileUrl     String?
+  fileHash    String?
+  mimeType    String?
+  sizeBytes   Int?
+  createdAt   DateTime @default(now())
+}
+
+model TradeEvent {
+  id        String   @id
+  tradeId   String
+  trade     Trade    @relation(fields: [tradeId], references: [id])
+  actor     String
+  eventType String
+  oldStatus String?
+  newStatus String?
+  metadata  String   @default("{}")
+  createdAt DateTime @default(now())
+}
+
+model Dispute {
+  id          String   @id
+  tradeId     String
+  trade       Trade    @relation(fields: [tradeId], references: [id])
+  openedBy    String
+  status      String
+  reason      String?
+  buyerClaim  String?
+  sellerClaim String?
+  assignedAdminId String?
+  resolution  String?
+  resolvedBy  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model WalletAccount {
+  id        String   @id
+  userId    String
+  asset     String   @default("BTC")
+  createdAt DateTime @default(now())
+}
+
+model LedgerGroup {
+  id        String   @id
+  reason    String
+  idempotencyKey String? @unique
+  createdAt DateTime @default(now())
+  entries   LedgerEntry[]
+}
+
+model LedgerEntry {
+  id           String   @id
+  groupId      String
+  group        LedgerGroup @relation(fields: [groupId], references: [id])
+  account      String
+  direction    String
+  sats         Int
+  reason       String
+  tradeId      String?
+  trade        Trade?   @relation(fields: [tradeId], references: [id])
+  withdrawalId String?
+  depositId    String?
+  createdAt    DateTime @default(now())
+}
+
+model BtcDeposit {
+  id            String   @id
+  userId        String
+  address       String
+  txid          String?
+  amountSats    Int
+  confirmations Int      @default(0)
+  status        String
+  detectedAt    DateTime?
+  creditedAt    DateTime?
+  createdAt     DateTime @default(now())
+}
+
+model BtcWithdrawal {
+  id              String   @id
+  userId          String
+  address         String
+  amountSats      Int
+  feeSats         Int
+  status          String
+  riskStatus      String   @default("pending")
+  adminApprovedBy String?
+  txid            String?
+  createdAt       DateTime @default(now())
+  reviewedAt      DateTime?
+  broadcastAt     DateTime?
+}
+
+model Feedback {
+  id        String   @id
+  tradeId   String
+  trade     Trade    @relation(fields: [tradeId], references: [id])
+  fromUser  String
+  toUser    String
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+model RiskFlag {
+  id          String   @id
+  userId      String?
+  tradeId     String?
+  flagType    String
+  severity    String
+  details     String
+  status      String
+  createdAt   DateTime @default(now())
+  resolvedAt  DateTime?
+}
+
+model AuditLog {
+  id         String   @id
+  actor      String
+  action     String
+  target     String
+  details    String
+  metadata   String   @default("{}")
+  createdAt  DateTime @default(now())
+}
+
+model NotificationEvent {
+  id        String   @id
+  channel   String
+  event     String
+  recipient String
+  status    String
+  payload   String
+  createdAt DateTime @default(now())
+}
+
+model WorkerRun {
+  id        String   @id
+  worker    String
+  status    String
+  details   String
+  createdAt DateTime @default(now())
+}
+
+model IdempotencyKey {
+  key       String   @id
+  scope     String
+  result    String?
+  createdAt DateTime @default(now())
+}

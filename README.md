@@ -1,254 +1,75 @@
 # Satoshi's Ranch
 
-**GitHub-only local build. Do not deploy this package as a live exchange.**
-
-Satoshi's Ranch is a LocalBitcoins-style, Bitcoin-only P2P marketplace prototype. The bible for this repo is the 30-phase Satoshi's Ranch plan: dense offer-table UI, invite-only sellers, seller-funded BTC escrow, strict trade states, double-entry ledger, admin disputes, tiny limits, fake/testnet before mainnet, and no bubbly AI design.
-
-This build is intentionally local-first. It persists local test actions to `data/local-state.json`, but it does **not** move real BTC, touch fiat, broadcast Bitcoin transactions, or connect to production infrastructure.
+Local-first Bitcoin P2P escrow marketplace prototype inspired by LocalBitcoins. This repo is built to be turnkey: clone it, add local env vars, initialize the local database, seed demo data, and run.
 
 ## Current status
 
-This package fixes the earlier partial verdicts with local implementations:
+This is a **database-first local build**. The marketplace, seller approval flow, offers, trade states, fake escrow accounting, double-entry ledger, disputes, admin tools, notifications, workers, and audit suite are built for local development. Real Bitcoin custody and mainnet broadcast remain disabled.
 
-- Functional marketplace filters using query params.
-- Local account registration and mock login/session records.
-- Local seller application and admin approval/rejection workflow.
-- Local offer creation plus pause/resume API routes.
-- Trade-room actions for mark paid, release, dispute, cancel, messages, evidence notes, and feedback.
-- Fake escrow release/refund/admin-resolution ledger mutations.
-- Dispute evidence notes and admin resolution actions.
-- Runtime audit log writes.
-- Mock notification outbox.
-- Withdrawal queue with admin review and broadcast disabled.
-- Local worker scan for trade timers, disputes, ledger reconciliation, and disabled wallet watcher.
-- README deployment notes, env placeholders, API surface, and TODOs.
-
-## Run locally
+## Quick start
 
 ```bash
-npm install
+cp .env.example .env.local
+cp .env.example .env
+npm install --no-package-lock
+npm run db:push
+npm run db:seed
 npm run dev
 ```
 
-Open:
+Open `http://localhost:3000`.
 
-```text
-http://localhost:3000
-```
-
-## Audit locally
+## Audit
 
 ```bash
-npm run audit:local
 npm run build
+npm run audit:local
 ```
 
-The local audit runs:
+## Safety defaults
 
-```bash
-npm run audit:phase
-npm run audit:ledger
-npm run audit:safety
-npm run audit:all
-npm run audit:functional
-```
+- `BTC_WALLET_MODE=disabled`
+- `BTC_MAINNET_BROADCAST_ENABLED=false`
+- `WITHDRAWALS_ENABLED=false`
+- No wallet seed, private key, API token, or database password belongs in GitHub.
 
-## Local state
+## Local demo accounts
 
-The app auto-creates this file on first run:
+Seeded demo users use local-only placeholder passwords and must not be used in production. Replace auth/session configuration before any deployment.
 
-```text
-data/local-state.json
-```
+## Important docs
 
-It stores local test accounts, offers, trades, messages, evidence notes, seller applications, feedback, audit logs, notifications, sessions, withdrawals, and worker runs.
+- `docs/DB_FIRST_PHASES.md`
+- `docs/DB_FIRST_AUDIT_SUMMARY.md`
+- `docs/ENV_VARS.md`
+- `docs/API_ENDPOINTS.md`
+- `docs/WALLET_SAFETY.md`
+- `docs/DEPLOYMENT_CHECKLIST.md`
 
-Reset local state:
+## What is still not real
 
-```bash
-curl -X POST http://localhost:3000/api/local-state/reset
-```
+- Real BTC custody
+- Mainnet broadcast
+- Real hosted Postgres deployment
+- Real S3 evidence uploads
+- Real email/Telegram sends
+- Redis-backed worker daemon
+- Regtest/testnet wallet activation
 
-Or delete `data/local-state.json` and restart the app.
+Those are intentionally later phases after this local database-first layer is stable.
 
 ## Environment variables
 
-None are required for this local build.
-
-Future env vars that will be needed before moving beyond local fake mode:
-
-```bash
-DATABASE_URL=
-SESSION_SECRET=
-TOTP_ENCRYPTION_KEY=
-EMAIL_FROM=
-EMAIL_PROVIDER_API_KEY=
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_ADMIN_CHAT_ID=
-S3_ENDPOINT=
-S3_ACCESS_KEY_ID=
-S3_SECRET_ACCESS_KEY=
-S3_BUCKET=
-REDIS_URL=
-BTC_NETWORK=testnet
-BTC_RPC_URL=
-BTC_RPC_USER=
-BTC_RPC_PASSWORD=
-ELECTRS_URL=
-MEMPOOL_API_URL=
-WALLET_ENCRYPTION_KEY=
-ADMIN_ALLOWLIST=
-```
-
-Mainnet-specific env vars should not be added until the testnet phase passes a separate audit:
-
-```bash
-BTC_NETWORK=mainnet
-MAINNET_BROADCAST_ENABLED=false
-HOT_WALLET_CAP_SATS=
-MANUAL_WITHDRAWAL_REVIEW_SATS=
-COLD_STORAGE_POLICY_DOC_URL=
-```
-
-`MAINNET_BROADCAST_ENABLED` must remain false until a dedicated mainnet gate review is finished.
+All required and optional environment variables are documented in `.env.example` and `docs/ENV_VARS.md`. Copy `.env.example` to `.env.local` for Next.js and `.env` for Prisma CLI local commands.
 
 ## API surface
 
-### Health and phases
-
-```text
-GET  /api/health
-GET  /api/phases
-POST /api/local-state/reset
-```
-
-### Auth, local only
-
-```text
-POST /api/auth/register
-POST /api/auth/login
-POST /api/auth/logout
-```
-
-### Seller workflow
-
-```text
-POST /api/seller/apply
-POST /api/admin/seller-applications/:id/approve
-POST /api/admin/seller-applications/:id/reject
-```
-
-### Offers
-
-```text
-GET  /api/offers
-POST /api/offers
-POST /api/offers/:id/pause
-POST /api/offers/:id/resume
-```
-
-### Trades
-
-```text
-GET  /api/trades
-POST /api/trades/:id/mark-paid
-POST /api/trades/:id/release
-POST /api/trades/:id/cancel
-POST /api/trades/:id/dispute
-POST /api/trades/:id/messages
-POST /api/trades/:id/evidence
-POST /api/trades/:id/feedback
-```
-
-### Disputes
-
-```text
-GET  /api/admin/disputes
-POST /api/admin/disputes/:id/resolve-buyer
-POST /api/admin/disputes/:id/resolve-seller
-POST /api/admin/disputes/:id/refund
-```
-
-### Wallet, local only
-
-```text
-GET  /api/wallet
-POST /api/wallet/withdraw
-POST /api/admin/withdrawals/:id/approve
-POST /api/admin/withdrawals/:id/reject
-```
-
-Approval does not broadcast. It only changes local status to `broadcast_disabled`.
-
-### Admin and ops
-
-```text
-GET  /api/admin/overview
-GET  /api/admin/ledger
-GET  /api/admin/audit
-GET  /api/admin/workers/run
-POST /api/admin/workers/run
-```
-
-## Pages
-
-```text
-/
-/buy-bitcoin
-/login
-/register
-/seller/apply
-/offers/:id
-/offers/manage
-/traders/:username
-/trades
-/trades/:id
-/wallet
-/dashboard
-/phases
-/phases/:slug
-/admin
-/admin/trades
-/admin/disputes
-/admin/users
-/admin/wallet
-/admin/ledger
-/admin/risk
-/admin/ops
-```
+The API surface is documented in `docs/API_ENDPOINTS.md`. The local app includes auth, offers, trades, wallet, admin, worker, cron, marketplace, trader, and database-health routes.
 
 ## What still needs to be added
 
-This repo is now a strong local prototype, but these items are intentionally not production-ready yet:
+Real BTC custody, mainnet broadcast, hosted Postgres, real S3/R2 evidence uploads, live email/Telegram sends, Redis-backed workers, regtest/testnet watcher activation, and production auth hardening remain intentionally disabled until later phases.
 
-1. Replace local JSON state with Postgres persistence.
-2. Add real password hashing, session cookies, CSRF protection, and TOTP verification.
-3. Add real authorization boundaries between buyer, seller, and admin routes.
-4. Add real upload storage for dispute screenshots and file hashing.
-5. Add Redis-backed workers instead of request-triggered mock workers.
-6. Add testnet Bitcoin watcher before any mainnet path exists.
-7. Add proper UTXO management and wallet service separation.
-8. Add hardware/cold-wallet policy and operational signing procedure.
-9. Add email provider and Telegram bot integrations.
-10. Add rate limits, IP/device clustering, and abuse controls.
-11. Add full database migrations and seed scripts.
-12. Add Playwright or similar browser tests.
-13. Add unit tests around trade-state transitions and ledger mutations.
-14. Add real admin authentication and admin allowlist.
-15. Add emergency global freeze switches for trades and withdrawals.
-16. Add legal/risk copy before any public launch.
+## GitHub-only local build
 
-## Tacos
-
-No real tacos are required, but the build does need these before mainnet: boring audits, small limits, handpicked sellers, testnet proof, wallet isolation, dispute tooling, and zero cowboy nonsense.
-
-## Safety rules
-
-- No fiat custody.
-- No real BTC custody in this local build.
-- No mainnet broadcast path.
-- No open seller signup for launch.
-- No auto-release after buyer marks paid.
-- No gift-card marketplace in v1.
-- No hidden wallet balances that bypass the ledger.
-- No package lock, `node_modules`, `.next`, or `tsconfig.tsbuildinfo` in the project zip.
+This repo is intended to be safe for GitHub as a local-first development build. Do not commit `.env`, `.env.local`, wallet files, upload folders, generated databases, `node_modules`, or `.next`.
