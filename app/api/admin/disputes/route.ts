@@ -1,2 +1,2 @@
-export const dynamic = 'force-dynamic';
-import { getTrades } from '@/lib/data';export async function GET(){return Response.json({disputes:getTrades().filter(t=>t.status==='DISPUTED'||t.status==='ADMIN_REVIEW')});}
+import { ok } from '@/lib/api/response';import { requireAdmin } from '@/lib/auth/session';
+export async function GET(){await requireAdmin();return ok({status:'admin route protected'});}

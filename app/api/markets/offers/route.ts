@@ -1,3 +1,2 @@
-export const dynamic = 'force-dynamic';
-import { ok } from '@/lib/api/response';import { readState } from '@/lib/local-store';
-export async function GET(){ return ok(readState().offers.filter(o=>o.status==='online')); }
+import { ok } from '@/lib/api/response';import { listOffers } from '@/lib/repositories/offers';
+export async function GET(req:Request){ const url=new URL(req.url); const offers=await listOffers({country:url.searchParams.get('country')||'Any',currency:url.searchParams.get('currency')||'Any',payment:url.searchParams.get('payment')||'Any',amount:url.searchParams.get('amount')||''}); return ok({ offers }); }

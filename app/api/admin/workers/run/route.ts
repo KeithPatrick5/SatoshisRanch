@@ -1,3 +1,2 @@
-export const dynamic = 'force-dynamic';
-import { runDatabaseWorkerSweep } from '@/lib/workers/db-workers';
-export async function POST(){return Response.json({ok:true,result:runDatabaseWorkerSweep()});}
+import { redirect } from 'next/navigation';import { requireAdmin } from '@/lib/auth/session';import { runLocalWorkers } from '@/lib/workers';import { writeAudit } from '@/lib/repositories/audit';import { verifyCsrfFromForm } from '@/lib/api/csrf';
+export async function POST(req:Request){const admin:any=await requireAdmin();const f=await req.formData().catch(()=>new FormData());if(f.has('_csrf')) await verifyCsrfFromForm(f);await runLocalWorkers(admin.username);await writeAudit(admin.username,'worker.run','local-workers','Ran local worker sweep.');redirect('/admin/ops')}

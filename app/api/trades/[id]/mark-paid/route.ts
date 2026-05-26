@@ -1,4 +1,2 @@
-export const dynamic = 'force-dynamic';
-import { redirect } from 'next/navigation';
-import { markTradePaidDb } from '@/lib/trades/db-engine';
-export async function POST(_:Request, context:{params:Promise<{id:string}>}){const {id}=await context.params;try{markTradePaidDb(id,'local-buyer');}catch{}redirect(`/trades/${id}`)}
+import { redirect } from 'next/navigation';import { requireUser } from '@/lib/auth/session';import { markTradePaidDb } from '@/lib/trades/db-engine';import { requireIdempotency } from '@/lib/api/idempotency';import { verifyCsrfFromForm } from '@/lib/api/csrf';import { assertRateLimit } from '@/lib/api/rate-limit';
+export async function POST(req:Request,context:{params:Promise<{id:string}>}){assertRateLimit('trade:mark-paid',30);const user:any=await requireUser();const {id}=await context.params;const f=await req.formData();await verifyCsrfFromForm(f);await requireIdempotency(req,'trade.mark-paid',{id,actor:user.username});await markTradePaidDb(id,user.username);redirect(`/trades/${id}`)}

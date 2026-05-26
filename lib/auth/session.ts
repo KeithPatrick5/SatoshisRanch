@@ -1,5 +1,7 @@
 import { cookies } from 'next/headers';
-import { readState } from '../local-store';
+import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/db';
+import crypto from 'crypto';
 
 export const SESSION_COOKIE = 'sr_session';
 
@@ -8,18 +10,33 @@ export async function getSessionIdFromCookies() {
   return store.get(SESSION_COOKIE)?.value ?? null;
 }
 
+export async function createSessionForUser(userId: string, meta?: { ip?: string; userAgent?: string }) {
+  const id = `sess-${crypto.randomBytes(18).toString('hex')}`;
+  await prisma.session.create({ data: { id, userId, ip: meta?.ip ?? 'local', userAgent: meta?.userAgent ?? 'local-dev' } });
+  const store = await cookies();
+  store.set(SESSION_COOKIE, id, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 60 * 60 * 24 * 7 });
+  return id;
+}
+
+export async function revokeCurrentSession() {
+  const sessionId = await getSessionIdFromCookies();
+  if (sessionId) await prisma.session.updateMany({ where: { id: sessionId }, data: { revokedAt: new Date() } });
+  const store = await cookies();
+  store.set(SESSION_COOKIE, '', { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 0 });
+}
+
 export async function getCurrentUser() {
   const sessionId = await getSessionIdFromCookies();
   if (!sessionId) return null;
-  const state = readState();
-  const session = state.sessions.find((s) => s.id === sessionId && !s.revokedAt);
+  const session = await prisma.session.findFirst({ where: { id: sessionId, revokedAt: null }, include: { user: true } });
   if (!session) return null;
-  return state.users.find((u) => u.id === session.userId) ?? null;
+  await prisma.session.update({ where: { id: session.id }, data: { lastSeenAt: new Date() } }).catch(() => null);
+  return session.user;
 }
 
 export async function requireUser() {
   const user = await getCurrentUser();
-  if (!user) throw new Error('Authentication required');
+  if (!user) redirect('/login');
   if (user.status === 'suspended') throw new Error('Account suspended');
   return user;
 }

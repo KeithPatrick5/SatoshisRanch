@@ -1,3 +1,2 @@
-export const dynamic = 'force-dynamic';
-import { ok } from '@/lib/api/response';import { runWalletWatcherWorker } from '@/lib/workers/wallet-watcher';
-export async function POST(){ return ok(runWalletWatcherWorker()); }
+import { ok, fail } from '@/lib/api/response';import { runLocalWorkers } from '@/lib/workers';
+export async function POST(req:Request){const secret=req.headers.get('x-worker-secret')||new URL(req.url).searchParams.get('secret');if(process.env.WORKER_SECRET && secret!==process.env.WORKER_SECRET)return fail('Worker secret required',403);const result=await runLocalWorkers('SYSTEM');return ok({worker:'wallet-watch',result})}

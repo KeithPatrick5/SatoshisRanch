@@ -1,2 +1,8 @@
-const hits = new Map<string, number>();
-export function localRateLimit(key:string, max=60){ const next=(hits.get(key)||0)+1; hits.set(key,next); if(next>max) throw new Error('Rate limit exceeded in local guard'); }
+const buckets = new Map<string, { count: number; resetAt: number }>();
+export function assertRateLimit(key: string, limit = 30, windowMs = 60_000) {
+  const now = Date.now();
+  const current = buckets.get(key);
+  if (!current || current.resetAt < now) { buckets.set(key, { count: 1, resetAt: now + windowMs }); return; }
+  current.count += 1;
+  if (current.count > limit) throw new Error('Rate limit exceeded');
+}

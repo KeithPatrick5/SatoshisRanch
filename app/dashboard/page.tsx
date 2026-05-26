@@ -1,3 +1,3 @@
 export const dynamic = 'force-dynamic';
-import { Shell, PageTitle } from '@/components/Shell';import { AdminStats, AdminTrades, NotificationsTable } from '@/components/AdminTables';
-export default function Dashboard(){return <Shell><PageTitle title="Dashboard" subtitle="User command center for open trades, wallet state, notifications, and warnings."/><AdminStats/><AdminTrades/><div className="box"><h2>Local notifications</h2><NotificationsTable/></div></Shell>}
+import { Shell, PageTitle } from '@/components/Shell';import { requireUser } from '@/lib/auth/session';import { tradesRepo } from '@/lib/repositories/trades';
+export default async function Dashboard(){const user:any=await requireUser();const trades=await tradesRepo.byUser(user.username);return <Shell><PageTitle title="Dashboard" subtitle="Private DB-backed user dashboard."/><div className="stats"><div><b>{user.username}</b><span>signed in</span></div><div><b>{trades.length}</b><span>trades</span></div><div><b>{user.role}</b><span>role</span></div></div></Shell>}

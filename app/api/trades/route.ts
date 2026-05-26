@@ -1,2 +1,3 @@
-export const dynamic = 'force-dynamic';
-import { getTrades } from '@/lib/data';export async function GET(){return Response.json({trades:getTrades()});}
+import { redirect } from 'next/navigation';import { ok } from '@/lib/api/response';import { requireUser } from '@/lib/auth/session';import { tradesRepo } from '@/lib/repositories/trades';import { openTradeDb } from '@/lib/trades/db-engine';import { requireIdempotency } from '@/lib/api/idempotency';import { verifyCsrfFromForm } from '@/lib/api/csrf';import { assertRateLimit } from '@/lib/api/rate-limit';
+export async function GET(){const user:any=await requireUser();return ok({trades:await tradesRepo.byUser(user.username)})}
+export async function POST(req:Request){assertRateLimit('trade:open',20);const user:any=await requireUser();const f=await req.formData();await verifyCsrfFromForm(f);const payload={offerId:String(f.get('offerId')),fiatAmount:Number(f.get('fiatAmount')||0),buyer:user.username};const idem=await requireIdempotency(req,'trade.open',payload);const trade=await openTradeDb({...payload,idempotencyKey:idem.key});redirect(`/trades/${trade.id}`)}

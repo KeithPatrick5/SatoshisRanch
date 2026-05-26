@@ -1,3 +1,3 @@
 export const dynamic = 'force-dynamic';
-import { Shell, PageTitle } from '@/components/Shell';import { AdminTrades } from '@/components/AdminTables';
-export default function Trades(){return <Shell><PageTitle title="My trades" subtitle="Local fixture trades showing the strict state machine."/><AdminTrades/></Shell>}
+import Link from 'next/link';import { Shell, PageTitle } from '@/components/Shell';import { requireUser } from '@/lib/auth/session';import { tradesRepo } from '@/lib/repositories/trades';import { formatMoney } from '@/lib/data';
+export default async function Trades(){const user:any=await requireUser();const trades=await tradesRepo.byUser(user.username);return <Shell><PageTitle title="My trades" subtitle="Private trade list."/><table className="data-table"><thead><tr><th>ID</th><th>Status</th><th>Buyer</th><th>Seller</th><th>Amount</th><th></th></tr></thead><tbody>{trades.map(t=><tr key={t.id}><td>{t.id}</td><td>{t.status}</td><td>{t.buyer}</td><td>{t.seller}</td><td>{formatMoney(t.fiatAmount,t.currency)}</td><td><Link href={`/trades/${t.id}`}>Open</Link></td></tr>)}</tbody></table></Shell>}

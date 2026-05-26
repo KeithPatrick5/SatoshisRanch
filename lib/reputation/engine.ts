@@ -1,8 +1,12 @@
-import { readState } from '../local-store';
-export function calculateTraderStats(username: string) {
-  const state = readState();
-  const user = state.users.find((u) => u.username === username);
-  const completed = state.trades.filter((t) => (t.buyer === username || t.seller === username) && t.status === 'RELEASED');
-  const disputes = state.trades.filter((t) => (t.buyer === username || t.seller === username) && t.status.includes('DISPUT'));
-  return { username, completedTrades: completed.length || user?.trades || 0, disputeRate: completed.length ? disputes.length / completed.length : user?.disputeRate || 0, positive: user?.positive || 0, negative: user?.negative || 0 };
+import { prisma } from '@/lib/db';
+export async function calculateTraderStats(username: string) {
+  const [trades, feedback, disputes] = await Promise.all([
+    prisma.trade.findMany({ where: { OR: [{ buyer: username }, { seller: username }] } }),
+    prisma.feedback.findMany({ where: { toUser: username } }),
+    prisma.dispute.findMany({ where: { trade: { OR: [{ buyer: username }, { seller: username }] } } })
+  ]);
+  const positive = feedback.filter(f => f.rating > 0).length;
+  const negative = feedback.filter(f => f.rating < 0).length;
+  const completed = trades.filter(t => ['RELEASED','RESOLVED_BUYER'].includes(t.status)).length;
+  return { trades: trades.length, completed, positive, negative, disputeRate: trades.length ? disputes.length / trades.length : 0, volumeSats: trades.reduce((s,t)=>s+t.btcAmountSats,0) };
 }

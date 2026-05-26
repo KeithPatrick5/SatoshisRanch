@@ -1,6 +1,4 @@
-import { getRiskFlags } from './data';
-export function riskForTrade(tradeId:string){ return getRiskFlags().filter(f => f.tradeId === tradeId); }
-export function riskScore(tradeId:string){
-  return riskForTrade(tradeId).reduce((sum,f)=> sum + (f.severity === 'high' ? 50 : f.severity === 'medium' ? 20 : 5),0);
-}
-export function riskLabel(score:number){ return score >= 50 ? 'manual review' : score >= 20 ? 'watch' : 'normal'; }
+import { riskRepo } from '@/lib/repositories/risk';
+export async function riskForTrade(tradeId:string){ return riskRepo.forTrade(tradeId); }
+export async function riskScore(tradeId:string){ const flags=await riskRepo.forTrade(tradeId); return flags.reduce((s,f)=>s+(f.severity==='high'?60:f.severity==='medium'?30:10),0); }
+export function riskLabel(score:number){ return score>=80?'critical':score>=50?'high':score>=20?'watch':'low'; }

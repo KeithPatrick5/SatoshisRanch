@@ -1,19 +1,11 @@
-import { readState, writeState } from './local-store';
-import type { LocalState } from './types';
+import { PrismaClient } from '@prisma/client';
 
-export type DbClient = {
-  read(): LocalState;
-  write(state: LocalState): LocalState;
-  transaction<T>(fn: (state: LocalState) => T): T;
-};
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-export const db: DbClient = {
-  read: readState,
-  write: writeState,
-  transaction<T>(fn: (state: LocalState) => T): T {
-    const state = readState();
-    const result = fn(state);
-    writeState(state);
-    return result;
-  },
-};
+export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+
+export async function withDbTransaction<T>(fn: (tx: PrismaClient) => Promise<T>): Promise<T> {
+  return prisma.$transaction(async (tx) => fn(tx as PrismaClient));
+}

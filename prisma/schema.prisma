@@ -276,3 +276,24 @@ model IdempotencyKey {
   result    String?
   createdAt DateTime @default(now())
 }
+
+
+model AdminNote {
+  id        String   @id
+  adminId   String
+  target    String
+  note      String
+  createdAt DateTime @default(now())
+}
+
+model UserLimit {
+  id        String   @id
+  userId    String
+  tier      String
+  maxTradeSats Int
+  dailyVolumeSats Int
+  activeTradeLimit Int
+  withdrawalHoldHours Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -1,3 +1,7 @@
-import { db } from '../db';
-export function readWalletState(){ return db.read(); }
-export const walletRepositoryStatus = 'local-json adapter active; database-backed implementation planned behind same repository interface';
+import { prisma } from '@/lib/db';
+export const walletRepo = {
+  withdrawals: () => prisma.btcWithdrawal.findMany({ orderBy: { createdAt: 'desc' } }),
+  findWithdrawal: (id: string) => prisma.btcWithdrawal.findUnique({ where: { id } }),
+  createWithdrawal: (data: any) => prisma.btcWithdrawal.create({ data }),
+  updateWithdrawal: (id: string, data: any) => prisma.btcWithdrawal.update({ where: { id }, data }),
+};

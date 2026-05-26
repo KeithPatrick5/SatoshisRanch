@@ -1,7 +1,7 @@
 import fs from 'fs';
 let ok = true;
 const required = [
-'app/page.tsx','app/buy-bitcoin/page.tsx','app/offers/[id]/page.tsx','app/traders/[username]/page.tsx','app/trades/[id]/page.tsx','app/wallet/page.tsx','app/admin/page.tsx','app/login/page.tsx','app/register/page.tsx','app/seller/apply/page.tsx','app/admin/disputes/page.tsx','app/admin/ledger/page.tsx','app/admin/risk/page.tsx','app/admin/ops/page.tsx','app/phases/page.tsx','components/OfferTable.tsx','components/TradeRoom.tsx','components/AdminTables.tsx','lib/local-store.ts','lib/trade-state.ts','lib/ledger.ts','lib/wallet.ts','lib/risk.ts','lib/limits.ts','lib/notifications.ts','lib/payment-methods.ts','docs/BUILD_BIBLE.md','docs/SAFETY.md','docs/FINAL_AUDIT.md','prisma/schema.prisma'
+'app/page.tsx','app/buy-bitcoin/page.tsx','app/offers/[id]/page.tsx','app/traders/[username]/page.tsx','app/trades/[id]/page.tsx','app/wallet/page.tsx','app/admin/page.tsx','app/login/page.tsx','app/register/page.tsx','app/seller/apply/page.tsx','app/admin/disputes/page.tsx','app/admin/ledger/page.tsx','app/admin/risk/page.tsx','app/admin/ops/page.tsx','app/phases/page.tsx','components/OfferTable.tsx','components/TradeRoom.tsx','components/AdminTables.tsx','lib/db.ts','lib/auth/session.ts','lib/trades/db-engine.ts','lib/trade-state.ts','lib/ledger.ts','lib/wallet.ts','lib/risk.ts','lib/limits.ts','lib/notifications.ts','lib/payment-methods.ts','docs/BUILD_BIBLE.md','docs/SAFETY.md','docs/FINAL_AUDIT.md','prisma/schema.prisma'
 ];
 for (const f of required) { if (!fs.existsSync(f)) { console.error(`FAIL required missing ${f}`); ok=false; } else console.log(`PASS required file ${f}`); }
 const states = fs.readFileSync('lib/trade-state.ts','utf8');

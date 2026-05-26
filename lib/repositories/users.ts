@@ -1,4 +1,7 @@
-import { db } from '../db';
-export function listUsers(){ return db.read().users; }
-export function findUserByUsername(username:string){ return db.read().users.find(u=>u.username===username); }
-export function findUserById(id:string){ return db.read().users.find(u=>u.id===id); }
+import { prisma } from '@/lib/db';
+export const usersRepo = {
+  list: () => prisma.user.findMany({ orderBy: { createdAt: 'asc' } }),
+  findById: (id: string) => prisma.user.findUnique({ where: { id } }),
+  findByUsername: (username: string) => prisma.user.findUnique({ where: { username } }),
+  findByEmail: (email: string) => prisma.user.findUnique({ where: { email } }),
+};

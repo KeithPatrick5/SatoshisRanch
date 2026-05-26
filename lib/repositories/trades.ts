@@ -1,3 +1,6 @@
-import { db } from '../db';
-export function readTradesState(){ return db.read(); }
-export const tradesRepositoryStatus = 'local-json adapter active; database-backed implementation planned behind same repository interface';
+import { prisma } from '@/lib/db';
+export const tradesRepo = {
+  list: () => prisma.trade.findMany({ orderBy: { createdAt: 'desc' } }),
+  find: (id: string) => prisma.trade.findUnique({ where: { id }, include: { messages: true, evidence: true, events: true } }),
+  byUser: (username: string) => prisma.trade.findMany({ where: { OR: [{ buyer: username }, { seller: username }] }, orderBy: { createdAt: 'desc' } }),
+};

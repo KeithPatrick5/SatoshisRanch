@@ -5,7 +5,7 @@ const required = [
   'lib/auth/password.ts',
   'lib/auth/session.ts',
   'lib/storage/local.ts',
-  'lib/workers/db-workers.ts',
+  'lib/workers.ts',
   'prisma/schema.prisma',
   'prisma/seed.ts',
   'docs/DB_FIRST_PHASES.md',

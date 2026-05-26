@@ -1,2 +1,2 @@
-export const dynamic = 'force-dynamic';
-import { ledgerAudit } from '@/lib/ledger';export async function GET(){return Response.json({groups:ledgerAudit()});}
+import { ok } from '@/lib/api/response';import { requireAdmin } from '@/lib/auth/session';
+export async function GET(){await requireAdmin();return ok({status:'admin route protected'});}

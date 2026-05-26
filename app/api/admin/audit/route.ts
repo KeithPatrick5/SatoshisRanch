@@ -1,2 +1,2 @@
-export const dynamic = 'force-dynamic';
-import { getAuditLogs } from '@/lib/data';export async function GET(){return Response.json({auditLogs:getAuditLogs()});}
+import { ok } from '@/lib/api/response';import { requireAdmin } from '@/lib/auth/session';
+export async function GET(){await requireAdmin();return ok({status:'admin route protected'});}

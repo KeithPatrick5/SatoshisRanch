@@ -1,2 +1,3 @@
+import { requireAdmin } from '@/lib/auth/session';
 export const dynamic = 'force-dynamic';
-import { Shell, PageTitle } from '@/components/Shell';import { AdminTrades } from '@/components/AdminTables';export default function AdminTradesPage(){return <Shell><PageTitle title="Admin trades" subtitle="All local trades with status, risk, and action links."/><AdminTrades/></Shell>}
+import { Shell, PageTitle } from '@/components/Shell';import { AdminTrades } from '@/components/AdminTables';export default async function AdminTradesPage(){await requireAdmin();return <Shell><PageTitle title="Admin trades" subtitle="All local trades with status, risk, and action links."/><AdminTrades/></Shell>}

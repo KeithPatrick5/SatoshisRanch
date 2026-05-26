@@ -1,58 +1,28 @@
-import { appendLedgerGroup, appendMessage, appendNotification } from '../local-store';
-import { withLocalDbTransaction } from '../local-database';
-import { canTransition, type TradeState } from '../trade-state';
+import { prisma, withDbTransaction } from '@/lib/db';
+import { createLedgerGroup } from '@/lib/repositories/ledger';
+import { writeAudit } from '@/lib/repositories/audit';
+import { queueNotification } from '@/lib/repositories/notifications';
+import { canTransition, type TradeState } from '@/lib/trade-state';
 
-function assertTransition(from: string, to: TradeState) {
-  if (!canTransition(from as TradeState, to)) throw new Error(`Illegal trade transition: ${from} -> ${to}`);
-}
+const terminal = ['RELEASED','CANCELLED','EXPIRED','REFUNDED','RESOLVED_BUYER','RESOLVED_SELLER'];
+function assertNotTerminal(status:string){ if(terminal.includes(status)) throw new Error('Trade is already terminal'); }
+async function event(tradeId:string, actor:string, eventType:string, oldStatus?:string, newStatus?:string){ await prisma.tradeEvent.create({data:{id:`te-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,tradeId,actor,eventType,oldStatus,newStatus,metadata:'{}'}}); }
+async function systemMessage(tradeId:string, body:string){ await prisma.tradeMessage.create({data:{id:`tm-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,tradeId,sender:'SYSTEM',body,systemMessage:true}}); }
 
-export function markTradePaidDb(tradeId: string, actor = 'local-buyer') {
-  return withLocalDbTransaction(actor, 'trade.mark_paid', (state) => {
-    const trade = state.trades.find((t) => t.id === tradeId);
-    if (!trade) throw new Error('Trade not found');
-    assertTransition(trade.status, 'BUYER_MARKED_PAID');
-    trade.status = 'BUYER_MARKED_PAID';
-    trade.deadline = 'seller release required';
-    appendMessage(state, tradeId, 'system', 'Buyer marked payment as sent. Seller must verify before release.', true);
-    appendNotification(state, 'email', 'trade.marked_paid', trade.seller, `${tradeId}: buyer marked paid.`);
-    return trade;
-  });
+export async function openTradeDb(input:{offerId:string;buyer:string;fiatAmount:number;idempotencyKey?:string}){
+ return withDbTransaction(async()=>{
+  const offer=await prisma.offer.findUnique({where:{id:input.offerId}}); if(!offer||offer.status!=='open') throw new Error('Offer is not open');
+  if(input.fiatAmount<offer.minFiat||input.fiatAmount>offer.maxFiat) throw new Error('Amount outside offer limits');
+  const btcAmountSats=Math.floor((input.fiatAmount/offer.price)*100_000_000); const feeSats=Math.max(1,Math.floor(btcAmountSats*0.01)); const buyerReceivesSats=btcAmountSats-feeSats;
+  const id=`SR-${Date.now().toString().slice(-6)}`;
+  const trade=await prisma.trade.create({data:{id,offerId:offer.id,buyer:input.buyer,seller:offer.seller,status:'WAITING_BUYER_PAYMENT',currency:offer.currency,fiatAmount:input.fiatAmount,btcAmountSats,feeSats,buyerReceivesSats,paymentMethod:offer.paymentMethod,deadline:'30 minutes',risk:'low'}});
+  await createLedgerGroup('TRADE_ESCROW_LOCKED',[{account:`seller:${offer.seller}:available`,direction:'debit',sats:btcAmountSats,reason:'seller fake BTC locked',tradeId:id},{account:`escrow:${id}`,direction:'credit',sats:btcAmountSats,reason:'trade escrow liability',tradeId:id}],input.idempotencyKey);
+  await event(id,input.buyer,'trade.opened',undefined,'WAITING_BUYER_PAYMENT'); await systemMessage(id,'Trade opened and fake BTC locked in local escrow.'); await writeAudit(input.buyer,'trade.open',id,'Opened DB-backed local trade.'); await queueNotification('email','trade.opened',offer.seller,`${id} opened.`);
+  return trade;
+ });
 }
-
-export function releaseTradeDb(tradeId: string, actor = 'local-seller') {
-  return withLocalDbTransaction(actor, 'trade.release', (state) => {
-    const trade = state.trades.find((t) => t.id === tradeId);
-    if (!trade) throw new Error('Trade not found');
-    if (trade.status === 'RELEASED') throw new Error('Trade already released');
-    if (!['BUYER_MARKED_PAID','WAITING_SELLER_RELEASE','ADMIN_REVIEW'].includes(trade.status)) {
-      throw new Error(`Release not allowed from ${trade.status}`);
-    }
-    trade.status = 'RELEASED';
-    trade.deadline = 'complete';
-    appendLedgerGroup(state, [
-      { account: `escrow:${tradeId}`, direction: 'debit', sats: trade.btcAmountSats, reason: 'database-backed fake escrow release', tradeId },
-      { account: `buyer:${trade.buyer}:available`, direction: 'credit', sats: trade.buyerReceivesSats, reason: 'buyer receives fake BTC credit', tradeId },
-      { account: 'platform:fee_revenue', direction: 'credit', sats: trade.feeSats, reason: 'platform fee', tradeId },
-    ]);
-    appendMessage(state, tradeId, 'system', 'Fake escrow released through database transaction.', true);
-    appendNotification(state, 'email', 'trade.released', trade.buyer, `${tradeId}: fake BTC released.`);
-    return trade;
-  });
-}
-
-export function refundTradeDb(tradeId: string, actor = 'ranch_office') {
-  return withLocalDbTransaction(actor, 'trade.refund', (state) => {
-    const trade = state.trades.find((t) => t.id === tradeId);
-    if (!trade) throw new Error('Trade not found');
-    if (trade.status === 'RESOLVED_SELLER' || trade.status === 'REFUNDED') throw new Error('Trade already refunded');
-    trade.status = 'RESOLVED_SELLER';
-    trade.deadline = 'admin resolved';
-    appendLedgerGroup(state, [
-      { account: `escrow:${tradeId}`, direction: 'debit', sats: trade.btcAmountSats, reason: 'database-backed fake escrow refund', tradeId },
-      { account: `seller:${trade.seller}:available`, direction: 'credit', sats: trade.btcAmountSats, reason: 'seller refunded fake escrow', tradeId },
-    ]);
-    appendMessage(state, tradeId, 'system', 'Admin refunded fake escrow to seller through database transaction.', true);
-    appendNotification(state, 'admin', 'trade.refunded', 'ranch_office', `${tradeId}: seller refunded.`);
-    return trade;
-  });
-}
+export async function markTradePaidDb(tradeId: string, actor: string) { const trade=await prisma.trade.findUnique({where:{id:tradeId}}); if(!trade) throw new Error('Trade not found'); assertNotTerminal(trade.status); if(!canTransition(trade.status as TradeState,'BUYER_MARKED_PAID')) throw new Error('Illegal transition'); await prisma.trade.update({where:{id:tradeId},data:{status:'BUYER_MARKED_PAID'}}); await event(tradeId,actor,'trade.mark_paid',trade.status,'BUYER_MARKED_PAID'); await systemMessage(tradeId,'Buyer marked payment sent.'); await writeAudit(actor,'trade.mark_paid',tradeId,'Buyer marked paid.'); }
+export async function releaseTradeDb(tradeId: string, actor: string, idempotencyKey?: string) { const trade=await prisma.trade.findUnique({where:{id:tradeId}}); if(!trade) throw new Error('Trade not found'); assertNotTerminal(trade.status); if(!['BUYER_MARKED_PAID','WAITING_SELLER_RELEASE','ADMIN_REVIEW'].includes(trade.status)) throw new Error('Trade is not releasable'); await createLedgerGroup('TRADE_RELEASED_TO_BUYER',[{account:`escrow:${tradeId}`,direction:'debit',sats:trade.btcAmountSats,reason:'escrow released',tradeId},{account:`buyer:${trade.buyer}:available`,direction:'credit',sats:trade.buyerReceivesSats,reason:'buyer receives fake BTC',tradeId},{account:'platform:fee_revenue',direction:'credit',sats:trade.feeSats,reason:'platform fee',tradeId}],idempotencyKey); await prisma.trade.update({where:{id:tradeId},data:{status:'RELEASED'}}); await event(tradeId,actor,'trade.release',trade.status,'RELEASED'); await systemMessage(tradeId,'Seller released fake BTC to buyer.'); await writeAudit(actor,'trade.release',tradeId,'Released DB fake escrow.'); }
+export async function cancelTradeDb(tradeId:string, actor:string){ const trade=await prisma.trade.findUnique({where:{id:tradeId}}); if(!trade) throw new Error('Trade not found'); assertNotTerminal(trade.status); if(['BUYER_MARKED_PAID','WAITING_SELLER_RELEASE','DISPUTED','ADMIN_REVIEW'].includes(trade.status)) throw new Error('Cannot cancel after payment/dispute'); await prisma.trade.update({where:{id:tradeId},data:{status:'CANCELLED'}}); await event(tradeId,actor,'trade.cancel',trade.status,'CANCELLED'); await writeAudit(actor,'trade.cancel',tradeId,'Cancelled trade.'); }
+export async function disputeTradeDb(tradeId:string, actor:string){ const trade=await prisma.trade.findUnique({where:{id:tradeId}}); if(!trade) throw new Error('Trade not found'); assertNotTerminal(trade.status); await prisma.trade.update({where:{id:tradeId},data:{status:'DISPUTED'}}); await prisma.dispute.create({data:{id:`dp-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,tradeId,openedBy:actor,status:'open',reason:'Local dispute opened'}}); await event(tradeId,actor,'trade.dispute',trade.status,'DISPUTED'); await writeAudit(actor,'trade.dispute',tradeId,'Opened dispute.'); }
+export async function refundTradeDb(tradeId: string, actor: string, idempotencyKey?: string) { const trade=await prisma.trade.findUnique({where:{id:tradeId}}); if(!trade) throw new Error('Trade not found'); assertNotTerminal(trade.status); await createLedgerGroup('TRADE_REFUNDED_TO_SELLER',[{account:`escrow:${tradeId}`,direction:'debit',sats:trade.btcAmountSats,reason:'escrow refunded',tradeId},{account:`seller:${trade.seller}:available`,direction:'credit',sats:trade.btcAmountSats,reason:'seller refund',tradeId}],idempotencyKey); await prisma.trade.update({where:{id:tradeId},data:{status:'REFUNDED'}}); await event(tradeId,actor,'trade.refund',trade.status,'REFUNDED'); await systemMessage(tradeId,'Ranch Office refunded seller from fake escrow.'); await writeAudit(actor,'trade.refund',tradeId,'Refunded DB fake escrow.'); }

@@ -1,2 +1,2 @@
-export const dynamic = 'force-dynamic';
-import { getRiskFlags, getTrades } from '@/lib/data';export async function GET(){const trades=getTrades();const flags=getRiskFlags();return Response.json({trades:trades.length, disputes:trades.filter(t=>t.status==='DISPUTED'||t.status==='ADMIN_REVIEW').length, riskFlags:flags.length});}
+import { ok } from '@/lib/api/response';import { requireAdmin } from '@/lib/auth/session';import { getTrades, getRiskFlags, getWithdrawals, getLedgerTotals } from '@/lib/data';
+export async function GET(){await requireAdmin();const trades=await getTrades();const flags=await getRiskFlags();const withdrawals=await getWithdrawals();const totals=await getLedgerTotals();return ok({trades:trades.length,disputes:trades.filter((t:any)=>t.status==='DISPUTED'||t.status==='ADMIN_REVIEW').length,riskFlags:flags.length,pendingWithdrawals:withdrawals.filter((w:any)=>w.status==='pending_admin_review').length,ledgerAccounts:Object.keys(totals).length})}

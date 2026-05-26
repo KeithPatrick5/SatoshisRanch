@@ -1,6 +1,6 @@
 {
   "name": "satoshis-ranch",
-  "version": "0.70.0-database-first-local",
+  "version": "0.90.0-final-hardening-local",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,7 +10,7 @@
     "audit:all": "node scripts/audit-all.mjs",
     "audit:ledger": "node scripts/audit-ledger.mjs",
     "audit:safety": "node scripts/audit-safety.mjs",
-    "audit:local": "npm run audit:phase && npm run audit:ledger && npm run audit:safety && npm run audit:all && npm run audit:functional && npm run audit:env && npm run audit:routes && npm run audit:db && npm run audit:db-first",
+    "audit:local": "npm run audit:phase && npm run audit:ledger && npm run audit:safety && npm run audit:all && npm run audit:functional && npm run audit:env && npm run audit:routes && npm run audit:db && npm run audit:db-first && npm run audit:hardening",
     "audit:functional": "node scripts/audit-functional.mjs",
     "audit:env": "node scripts/audit-env.mjs",
     "audit:routes": "node scripts/audit-routes.mjs",
@@ -19,7 +19,17 @@
     "db:push": "DATABASE_URL=${DATABASE_URL:-file:./dev.db} prisma db push",
     "db:seed": "DATABASE_URL=${DATABASE_URL:-file:./dev.db} tsx prisma/seed.ts",
     "db:reset": "rm -f prisma/dev.db prisma/dev.db-journal && DATABASE_URL=${DATABASE_URL:-file:./dev.db} prisma db push && DATABASE_URL=${DATABASE_URL:-file:./dev.db} tsx prisma/seed.ts",
-    "audit:db-first": "node scripts/audit-db-first.mjs"
+    "audit:db-first": "node scripts/audit-db-first.mjs",
+    "audit:no-json-state": "node scripts/audit-no-json-state.mjs",
+    "audit:admin-enforcement": "node scripts/audit-admin-enforcement.mjs",
+    "audit:protected-pages": "node scripts/audit-protected-pages.mjs",
+    "audit:idempotency": "node scripts/audit-idempotency.mjs",
+    "audit:csrf": "node scripts/audit-csrf.mjs",
+    "audit:async-routes": "node scripts/audit-async-routes.mjs",
+    "audit:no-hardcoded-actors": "node scripts/audit-no-hardcoded-actors.mjs",
+    "audit:ledger-movement": "node scripts/audit-ledger-movement.mjs",
+    "audit:wallet-disabled": "node scripts/audit-wallet-disabled.mjs",
+    "audit:hardening": "npm run audit:no-json-state && npm run audit:admin-enforcement && npm run audit:protected-pages && npm run audit:idempotency && npm run audit:csrf && npm run audit:async-routes && npm run audit:no-hardcoded-actors && npm run audit:ledger-movement && npm run audit:wallet-disabled"
   },
   "dependencies": {
     "@types/node": "latest",

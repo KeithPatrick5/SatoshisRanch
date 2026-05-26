@@ -1,3 +1,2 @@
-export const dynamic='force-dynamic';
-import { assertLocalDbReady } from '@/lib/local-database';
-export async function GET(){return Response.json(assertLocalDbReady());}
+import { ok } from '@/lib/api/response';import { requireAdmin } from '@/lib/auth/session';
+export async function GET(){await requireAdmin();return ok({status:'admin route protected'});}

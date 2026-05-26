@@ -1,4 +1,2 @@
-export const dynamic = 'force-dynamic';
-import { redirect } from 'next/navigation';
-import { refundTradeDb } from '@/lib/trades/db-engine';
-export async function POST(_:Request, context:{params:Promise<{id:string}>}){const {id}=await context.params;try{refundTradeDb(id,'ranch_office');}catch{}redirect('/admin/disputes')}
+import { redirect } from 'next/navigation';import { requireAdmin } from '@/lib/auth/session';import { releaseTradeDb, refundTradeDb } from '@/lib/trades/db-engine';import { requireIdempotency } from '@/lib/api/idempotency';import { verifyCsrfFromForm } from '@/lib/api/csrf';
+export async function POST(req:Request, context:{params:Promise<{id:string}>}){const admin:any=await requireAdmin();const {id}=await context.params;const f=await req.formData();await verifyCsrfFromForm(f);const idem=await requireIdempotency(req,'admin.dispute.refund',{id,actor:admin.username});await refundTradeDb(id,admin.username,idem.key);redirect('/admin/disputes')}

@@ -1,3 +1,2 @@
-import { db } from '../db';
-export function readDisputesState(){ return db.read(); }
-export const disputesRepositoryStatus = 'local-json adapter active; database-backed implementation planned behind same repository interface';
+import { prisma } from '@/lib/db';
+export const disputesRepo = { list: () => prisma.dispute.findMany({ include: { trade: true }, orderBy: { createdAt: 'desc' } }), findByTrade: (tradeId: string) => prisma.dispute.findFirst({ where: { tradeId } }) };

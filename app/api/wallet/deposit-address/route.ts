@@ -1,3 +1,2 @@
-export const dynamic = 'force-dynamic';
-import { ok } from '@/lib/api/response';import { disabledWallet } from '@/lib/bitcoin/disabled-wallet';
-export async function POST(){ return ok(await disabledWallet.getDepositAddress('local-user')); }
+import { ok } from '@/lib/api/response';import { requireUser } from '@/lib/auth/session';import { disabledWallet } from '@/lib/bitcoin/disabled-wallet';import { verifyCsrfFromForm } from '@/lib/api/csrf';
+export async function POST(req: Request){ const f = await req.formData().catch(()=>new FormData()); if(f.has('_csrf')) await verifyCsrfFromForm(f); const user:any=await requireUser(); return ok({ address: await disabledWallet.getDepositAddress(user.id), walletMode:'disabled' }); }

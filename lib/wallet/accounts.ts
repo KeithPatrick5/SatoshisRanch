@@ -1,12 +1,9 @@
-import { readState } from '../local-store';
-export function getWalletSummary(userId: string) {
-  const state = readState();
-  let available = 0, locked = 0, pending = 0;
-  for (const e of state.ledger) {
-    const sign = e.direction === 'credit' ? 1 : -1;
-    if (e.account === `buyer:${userId}:available` || e.account === `seller:${userId}:available`) available += sign * e.sats;
-    if (e.account.includes(`:${userId}:locked`) || e.account.startsWith('escrow:')) locked += sign * e.sats;
-    if (e.account === `withdrawal:${userId}:pending`) pending += sign * e.sats;
-  }
-  return { userId, availableSats: available, lockedSats: locked, pendingWithdrawalSats: pending };
+import { ledgerTotals } from '@/lib/repositories/ledger';
+export async function getWalletSummary(username: string) {
+  const totals = await ledgerTotals();
+  return {
+    availableSats: Number(totals[`buyer:${username}:available`] || totals[`seller:${username}:available`] || 0),
+    lockedSats: Object.entries(totals).filter(([k]) => k.startsWith('escrow:')).reduce((s, [,v]) => s + Number(v), 0),
+    pendingWithdrawalSats: Number(totals[`user:${username}:pending_withdrawal`] || 0),
+  };
 }

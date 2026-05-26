@@ -1,4 +1,2 @@
-export const dynamic = 'force-dynamic';
-import { redirect } from 'next/navigation';
-import { releaseTradeDb } from '@/lib/trades/db-engine';
-export async function POST(_:Request, context:{params:Promise<{id:string}>}){const {id}=await context.params;try{releaseTradeDb(id,'local-seller');}catch{}redirect(`/trades/${id}`)}
+import { redirect } from 'next/navigation';import { requireUser } from '@/lib/auth/session';import { markTradePaidDb, releaseTradeDb, cancelTradeDb, disputeTradeDb } from '@/lib/trades/db-engine';import { requireIdempotency } from '@/lib/api/idempotency';import { verifyCsrfFromForm } from '@/lib/api/csrf';import { assertRateLimit } from '@/lib/api/rate-limit';
+export async function POST(req:Request,context:{params:Promise<{id:string}>}){assertRateLimit('trade:release',30);const user:any=await requireUser();const {id}=await context.params;const f=await req.formData();await verifyCsrfFromForm(f);const idem=await requireIdempotency(req,'trade.release',{id,actor:user.username});await releaseTradeDb(id,user.username,idem.key as never);redirect(`/trades/${id}`)}
