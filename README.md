@@ -2,9 +2,7 @@
 
 Bitcoin P2P escrow marketplace prototype.
 
-Satoshi's Ranch is a marketplace-style app for buyer/seller Bitcoin trades with escrow-style accounting, seller offers, disputes, admin tools, audit logs, and ledger checks.
-
-Real Bitcoin custody and mainnet broadcast are disabled.
+This repo is built for development and testing. BTC custody and mainnet transaction broadcast are disabled by default.
 
 ## Stack
 
@@ -12,35 +10,19 @@ Real Bitcoin custody and mainnet broadcast are disabled.
 - TypeScript
 - Prisma
 - SQLite for local development
-- Postgres-ready schema
-- DB-backed trades, offers, disputes, wallet accounting, and admin flows
+- Postgres-ready database config
 - Disabled Bitcoin wallet adapter
+- Local evidence upload adapter
+- Mock notification outbox
 
 ## Setup
 
-Install dependencies:
-
 ```bash
 npm install --no-package-lock
-```
-
-Create env files:
-
-```bash
 cp .env.example .env.local
 cp .env.example .env
-```
-
-Set up the database:
-
-```bash
 npm run db:push
 npm run db:seed
-```
-
-Run the app:
-
-```bash
 npm run dev
 ```
 
@@ -59,11 +41,6 @@ npm run db:push
 npm run db:seed
 npm run db:reset
 npm run audit:local
-```
-
-Additional audits may be available depending on the current build:
-
-```bash
 npm run audit:env
 npm run audit:db
 npm run audit:ledger
@@ -72,85 +49,43 @@ npm run audit:safety
 npm run audit:secrets
 npm run audit:functional
 npm run audit:db-first
-npm run audit:no-json-state
-npm run audit:auth
-npm run audit:trade-engine
-npm run audit:wallet-disabled
-npm run audit:admin-enforcement
-npm run audit:protected-pages
-npm run audit:idempotency
-npm run audit:csrf
-npm run audit:async-routes
-npm run audit:no-hardcoded-actors
-npm run audit:ledger-movement
 ```
 
-## Env
+## Environment
 
-Use `.env.example` as the template.
+Copy `.env.example` to `.env.local` and `.env` before running Prisma commands.
 
-Local SQLite default:
+Required local defaults:
 
 ```env
 DATABASE_URL="file:./dev.db"
+BTC_WALLET_MODE="disabled"
+BTC_MAINNET_BROADCAST_ENABLED="false"
 ```
 
-Required/local vars usually include:
+Do not commit real secrets, wallet material, RPC credentials, API keys, private keys, database files, uploads, or local env files.
 
-```env
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-APP_ENV=local
-DATABASE_URL="file:./dev.db"
+## Database
 
-SESSION_SECRET=
-PASSWORD_PEPPER=
-ADMIN_EMAILS=
+Local development uses SQLite through Prisma.
 
-BTC_NETWORK=regtest
-BTC_WALLET_MODE=disabled
-BTC_MAINNET_BROADCAST_ENABLED=false
+```bash
+npm run db:push
+npm run db:seed
 ```
 
-Optional provider vars:
-
-```env
-DIRECT_URL=
-
-STORAGE_PROVIDER=local
-S3_ENDPOINT=
-S3_BUCKET=
-S3_ACCESS_KEY_ID=
-S3_SECRET_ACCESS_KEY=
-S3_REGION=
-
-WORKER_SECRET=
-REDIS_URL=
-
-EMAIL_PROVIDER=mock
-RESEND_API_KEY=
-FROM_EMAIL=no-reply@satoshisranch.local
-
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_ADMIN_CHAT_ID=
-
-BITCOIN_RPC_URL=
-BITCOIN_RPC_USERNAME=
-BITCOIN_RPC_PASSWORD=
-BITCOIN_RPC_WALLET=
-BTC_INDEXER_URL=
-```
-
-Do not commit real env files, keys, tokens, wallet material, or database files.
-
-## Local accounts
-
-Seeded users are defined in:
+Generated database files should stay out of Git:
 
 ```text
-prisma/seed.ts
+prisma/dev.db
+prisma/dev.db-journal
 ```
 
-Expected local users:
+## Demo accounts
+
+Seeded development accounts are defined in `prisma/seed.ts`.
+
+Expected local accounts:
 
 ```text
 admin@satoshisranch.local
@@ -158,105 +93,152 @@ seller@satoshisranch.local
 buyer@satoshisranch.local
 ```
 
-Check the seed file for current local passwords and roles.
+Use the seed file as the source of truth for passwords and roles.
 
-## Database
-
-The app uses Prisma.
-
-Local commands:
-
-```bash
-npm run db:push
-npm run db:seed
-npm run db:reset
-```
-
-Generated DB files should stay out of git:
+## Core modules
 
 ```text
-prisma/dev.db
-prisma/dev.db-journal
+lib/auth              auth/session helpers
+lib/repositories      database access layer
+lib/trades            trade state and action engine
+lib/ledger            ledger validation and accounting
+lib/wallet            disabled wallet adapter and wallet helpers
+lib/risk              risk scoring/flags
+lib/notifications     notification outbox/providers
+lib/workers           worker scan helpers
+lib/storage           local/S3 storage adapters
+lib/bitcoin           disabled/regtest/testnet adapter shells
 ```
 
-## Wallet safety
+## Safety defaults
 
-Real Bitcoin movement is disabled.
-
-Required defaults:
+Bitcoin mainnet is disabled by default.
 
 ```env
-BTC_WALLET_MODE=disabled
-BTC_MAINNET_BROADCAST_ENABLED=false
+BTC_WALLET_MODE="disabled"
+BTC_MAINNET_BROADCAST_ENABLED="false"
 ```
 
-Withdrawal approval should not broadcast BTC in this build. The wallet adapter should block broadcast attempts unless the wallet layer is intentionally replaced and reviewed.
+Withdrawal approval must not broadcast a real transaction while the disabled wallet adapter is active.
 
-Mainnet should not be enabled until the escrow accounting, trade engine, dispute flow, admin controls, ledger reconciliation, and wallet integration have been reviewed and tested with regtest/testnet.
+Before enabling any Bitcoin adapter, finish and review:
 
-## Git cleanup before commit
+- auth and admin enforcement
+- trade state transitions
+- idempotency on money-moving routes
+- ledger reconciliation
+- dispute resolution accounting
+- withdrawal review flow
+- worker logs
+- wallet-disabled audit
 
-Run this before committing:
+## API overview
 
-```bash
-rm -rf node_modules .next package-lock.json tsconfig.tsbuildinfo prisma/dev.db prisma/dev.db-journal data/local-state.json data/local-db-lock.json uploads .env .env.local
-```
-
-## API areas
-
-Main API groups:
+### Public
 
 ```text
-/api/auth/*
-/api/me
-/api/offers/*
-/api/markets/*
-/api/trades/*
-/api/wallet/*
-/api/admin/*
-/api/cron/*
+GET  /api/health
+GET  /api/markets/offers
+GET  /api/price/btc
 ```
 
-Admin routes should require admin access. Money-moving routes should use the trade/ledger engines and idempotency checks.
+### Auth
+
+```text
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/logout
+GET  /api/me
+```
+
+### Offers
+
+```text
+GET  /api/offers
+POST /api/offers
+PATCH /api/offers/:id
+POST /api/offers/:id/pause
+POST /api/offers/:id/resume
+POST /api/offers/:id/archive
+```
+
+### Trades
+
+```text
+POST /api/trades
+GET  /api/trades
+GET  /api/trades/:id
+POST /api/trades/:id/mark-paid
+POST /api/trades/:id/release
+POST /api/trades/:id/cancel
+POST /api/trades/:id/dispute
+POST /api/trades/:id/messages
+POST /api/trades/:id/attachments
+POST /api/trades/:id/feedback
+```
+
+### Wallet
+
+```text
+GET  /api/wallet
+POST /api/wallet/deposit-address
+POST /api/wallet/withdraw
+GET  /api/wallet/transactions
+```
+
+### Admin
+
+```text
+GET  /api/admin/overview
+GET  /api/admin/trades
+GET  /api/admin/disputes
+POST /api/admin/disputes/:id/resolve-buyer
+POST /api/admin/disputes/:id/resolve-seller
+POST /api/admin/disputes/:id/refund-seller
+GET  /api/admin/users
+GET  /api/admin/wallet
+GET  /api/admin/ledger
+GET  /api/admin/risk
+GET  /api/admin/ops
+POST /api/admin/withdrawals/:id/approve
+POST /api/admin/withdrawals/:id/reject
+POST /api/admin/workers/run
+```
+
+### Workers
+
+```text
+POST /api/cron/run
+POST /api/cron/trade-expiry
+POST /api/cron/ledger-reconcile
+POST /api/cron/wallet-watch
+POST /api/cron/notifications
+```
 
 ## Ledger rules
 
-BTC accounting should go through the ledger.
+Every balance movement should go through the ledger engine.
 
-Examples:
+Basic movements:
 
 ```text
-Seller escrow lock:
-Debit seller available
-Credit trade escrow
-
-Release:
-Debit trade escrow
-Credit buyer available
-Debit trade escrow
-Credit platform fee revenue
-
-Refund:
-Debit trade escrow
-Credit seller available
-
-Withdrawal request:
-Debit user available
-Credit pending withdrawal
-
-Withdrawal rejection:
-Debit pending withdrawal
-Credit user available
+seller available -> trade escrow
+trade escrow -> buyer available
+trade escrow -> seller available
+user available -> pending withdrawal
+pending withdrawal -> user available
+trade escrow -> platform fee revenue
 ```
 
-No route should mutate wallet balances directly.
+No route should update balances without writing balanced ledger entries.
 
 ## Trade states
 
-Trade states should remain strict:
+Trade state transitions are handled in the trade engine. Keep the state machine strict.
+
+Expected states include:
 
 ```text
-OFFER_OPEN
 TRADE_CREATED
 WAITING_SELLER_ESCROW
 ESCROW_PENDING_CONFIRMATION
@@ -275,62 +257,22 @@ RESOLVED_SELLER
 REFUNDED
 ```
 
-Trade state changes should create trade events and audit logs.
+## Git cleanup
 
-## Admin rules
+Before committing:
 
-Admin actions should be logged.
-
-Examples:
-
-```text
-seller approval
-seller rejection
-dispute resolution
-withdrawal approval
-withdrawal rejection
-worker run
-risk flag updates
-admin notes
-manual adjustments
+```bash
+rm -rf node_modules .next package-lock.json tsconfig.tsbuildinfo prisma/dev.db prisma/dev.db-journal data/local-state.json data/local-db-lock.json uploads .env .env.local
 ```
-
-Sensitive admin actions should stay boring, obvious, and auditable.
 
 ## Tacos
 
-Tacos are the reminder not to overcomplicate the build.
+Keep the build boring until the core flow is solid.
 
-If a feature does not help one of these things, it can wait:
+If it does not help a buyer open a trade, lock escrow accounting, mark payment, release/refund, resolve a dispute, audit the ledger, protect users, protect the wallet, or keep admins from making expensive mistakes, it can wait.
 
-- open a trade
-- lock escrow accounting
-- mark paid
-- release or refund
-- resolve a dispute
-- audit the ledger
-- protect users
-- protect the wallet
-- help admins avoid mistakes
-
-No bubbly AI UI. No giant SaaS hero pages. No fake hype.
-
-Tables, filters, trade rooms, audit logs, disputes, and boring safety controls first.
+Tacos later. Ledger first.
 
 ## Notes
 
-This is a prototype and development foundation, not a production exchange.
-
-Before using real infrastructure, review:
-
-- auth
-- admin permissions
-- CSRF
-- idempotency
-- trade transactions
-- ledger reconciliation
-- wallet adapter behavior
-- withdrawal approval flow
-- dispute resolution flow
-- backup and recovery
-- legal/compliance posture
+This is a development prototype. Review wallet custody, compliance, admin controls, audit logging, and operational security before any public deployment or real BTC handling.
